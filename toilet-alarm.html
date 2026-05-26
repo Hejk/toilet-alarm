@@ -13,11 +13,7 @@
     <meta name="theme-color" content="#0a0a1a">
     <title>🚽 马桶闹钟</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -141,9 +137,7 @@
             box-shadow: 0 12px 40px rgba(0, 210, 255, 0.4);
         }
 
-        .btn-primary:active {
-            transform: translateY(0);
-        }
+        .btn-primary:active { transform: translateY(0); }
 
         .btn-danger {
             background: linear-gradient(135deg, #ff416c, #ff4b2b);
@@ -182,39 +176,34 @@
             font-variant-numeric: tabular-nums;
         }
 
-        .qr-section {
+        .info-section {
             text-align: center;
             margin-top: 20px;
         }
 
-        .qr-section h3 {
+        .info-section h3 {
             font-size: 16px;
             color: #aaa;
             margin-bottom: 15px;
         }
 
-        #toilet-qr {
-            background: #fff;
-            padding: 15px;
-            border-radius: 16px;
-            display: inline-block;
+        .info-icon {
+            font-size: 64px;
+            margin: 20px 0;
         }
 
-        .qr-hint {
-            font-size: 13px;
-            color: #666;
-            margin-top: 15px;
-            line-height: 1.6;
+        .info-hint {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.8;
         }
 
         /* ===== 闹钟响铃页面 ===== */
         #alarm-page {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: #0a0a1a;
             z-index: 1000;
             flex-direction: column;
@@ -222,11 +211,11 @@
 
         .alarm-header {
             text-align: center;
-            padding: 30px 20px 10px;
+            padding: 20px 20px 10px;
         }
 
         .alarm-header .logo {
-            font-size: 60px;
+            font-size: 50px;
             animation: shake 0.5s ease-in-out infinite;
         }
 
@@ -237,9 +226,9 @@
         }
 
         .alarm-header h1 {
-            font-size: 24px;
+            font-size: 22px;
             color: #ff416c;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .alarm-header p {
@@ -248,7 +237,7 @@
         }
 
         .alarm-time-big {
-            font-size: 64px;
+            font-size: 56px;
             font-weight: 800;
             text-align: center;
             color: #ff416c;
@@ -264,7 +253,7 @@
         .scanner-container {
             flex: 1;
             position: relative;
-            margin: 20px;
+            margin: 15px;
             border-radius: 20px;
             overflow: hidden;
             border: 3px solid rgba(0, 210, 255, 0.4);
@@ -277,42 +266,20 @@
             object-fit: cover;
         }
 
-        .scanner-overlay {
+        #detection-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 15px;
+            left: 15px;
+            width: calc(100% - 30px);
+            height: calc(100% - 30px);
             pointer-events: none;
         }
 
-        .scan-frame {
-            width: 220px;
-            height: 220px;
-            border: 3px solid rgba(0, 210, 255, 0.8);
-            border-radius: 20px;
-            position: relative;
-            box-shadow: 0 0 40px rgba(0, 210, 255, 0.2);
-        }
-
-        .scan-frame::before {
-            content: '';
+        .scanner-overlay {
             position: absolute;
-            top: -3px;
-            left: 20px;
-            right: 20px;
-            height: 3px;
-            background: #00d2ff;
-            animation: scan-line 2s ease-in-out infinite;
-        }
-
-        @keyframes scan-line {
-            0% { top: -3px; }
-            50% { top: calc(100% - 3px); }
-            100% { top: -3px; }
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
         }
 
         .scan-hint {
@@ -326,28 +293,68 @@
             font-size: 14px;
             color: #00d2ff;
             white-space: nowrap;
+            z-index: 2;
         }
 
-        .corner {
+        .detection-status {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            border-color: #00d2ff;
-            border-style: solid;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            z-index: 2;
+            white-space: nowrap;
         }
-        .corner.tl { top: -2px; left: -2px; border-width: 4px 0 0 4px; border-radius: 8px 0 0 0; }
-        .corner.tr { top: -2px; right: -2px; border-width: 4px 4px 0 0; border-radius: 0 8px 0 0; }
-        .corner.bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; border-radius: 0 0 0 8px; }
-        .corner.br { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; border-radius: 0 0 8px 0; }
+
+        .detection-status.searching {
+            background: rgba(255, 165, 0, 0.8);
+            color: #fff;
+        }
+
+        .detection-status.found {
+            background: rgba(76, 175, 80, 0.9);
+            color: #fff;
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        .detection-status.loading {
+            background: rgba(0, 210, 255, 0.8);
+            color: #fff;
+        }
+
+        .camera-error {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #aaa;
+        }
+
+        .camera-error .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .retry-btn {
+            margin-top: 15px;
+            padding: 10px 24px;
+            background: rgba(0, 210, 255, 0.15);
+            border: 1px solid #00d2ff;
+            color: #00d2ff;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
 
         /* ===== 成功页面 ===== */
         #success-page {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: linear-gradient(135deg, #0a560a, #0a0a1a);
             z-index: 2000;
             flex-direction: column;
@@ -381,14 +388,12 @@
             line-height: 1.6;
         }
 
-        /* ===== 提示弹窗 ===== */
+        /* ===== 弹窗 ===== */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
             z-index: 3000;
             align-items: center;
@@ -396,9 +401,7 @@
             padding: 20px;
         }
 
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
 
         .modal {
             background: #1a1a2e;
@@ -410,35 +413,9 @@
             text-align: center;
         }
 
-        .modal h3 {
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .modal p {
-            color: #aaa;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .modal .btn {
-            margin-top: 5px;
-        }
-
-        /* ===== 状态栏 ===== */
-        .status-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 8px 20px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #555;
-            z-index: 100;
-        }
+        .modal h3 { margin-bottom: 15px; font-size: 18px; }
+        .modal p { color: #aaa; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+        .modal .btn { margin-top: 5px; }
 
         /* ===== 重复设置 ===== */
         .repeat-wrapper {
@@ -450,8 +427,7 @@
         }
 
         .repeat-day {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.15);
             background: transparent;
@@ -471,16 +447,8 @@
             color: #00d2ff;
         }
 
-        .repeat-day:hover {
-            border-color: rgba(0, 210, 255, 0.5);
-        }
+        .repeat-day:hover { border-color: rgba(0, 210, 255, 0.5); }
 
-        /* ===== 隐藏canvas ===== */
-        #qr-canvas-hidden {
-            display: none;
-        }
-
-        /* ===== 错误提示 ===== */
         .error-msg {
             color: #ff416c;
             font-size: 13px;
@@ -489,29 +457,59 @@
             min-height: 20px;
         }
 
-        .camera-error {
+        /* ===== PWA 安装横幅 ===== */
+        @keyframes slideUp {
+            from { transform:translateX(-50%) translateY(100px); opacity:0; }
+            to { transform:translateX(-50%) translateY(0); opacity:1; }
+        }
+
+        /* ===== 加载动画 ===== */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px; height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #00d2ff;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .confidence-bar {
             position: absolute;
-            top: 50%;
+            bottom: 60px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 300px;
+            z-index: 2;
+        }
+
+        .confidence-bar-label {
+            font-size: 12px;
             color: #aaa;
+            margin-bottom: 4px;
+            text-align: center;
         }
 
-        .camera-error .icon {
-            font-size: 48px;
-            margin-bottom: 10px;
+        .confidence-bar-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
         }
 
-        .retry-btn {
-            margin-top: 15px;
-            padding: 10px 24px;
-            background: rgba(0, 210, 255, 0.15);
-            border: 1px solid #00d2ff;
-            color: #00d2ff;
-            border-radius: 10px;
-            font-size: 14px;
-            cursor: pointer;
+        .confidence-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff416c, #ff9800, #4caf50);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
         }
     </style>
 </head>
@@ -520,7 +518,7 @@
     <div id="setup-page">
         <div class="logo">🚽</div>
         <h1 class="app-title">马桶闹钟</h1>
-        <p class="app-subtitle">必须走到马桶前才能关闭的闹钟<br>再也不会按掉闹钟继续睡了！</p>
+        <p class="app-subtitle">AI 识别马桶才能关闭的闹钟<br>再也不会按掉闹钟继续睡了！</p>
 
         <div class="card">
             <p class="label">设定闹钟时间</p>
@@ -553,12 +551,15 @@
         <div class="alarm-display" id="alarm-time-display">07:00</div>
         <div class="countdown-display" id="countdown-display">距离闹钟还有 --</div>
 
-        <div class="card qr-section">
-            <h3>📱 你的马桶专属二维码</h3>
-            <div id="toilet-qr"></div>
-            <p class="qr-hint">
-                请截图并打印此二维码<br>贴在马桶旁边（马桶盖/水箱/墙壁）<br>
-                闹钟响起后需扫描此码才能关闭
+        <div class="card info-section">
+            <div class="info-icon">🚽📷</div>
+            <h3>闹钟响起后</h3>
+            <p class="info-hint">
+                摄像头会自动打开<br>
+                将手机对准马桶<br>
+                AI 识别到马桶后自动关闭闹钟<br><br>
+                💡 确保卫生间光线充足<br>
+                💡 马桶在画面中尽量大一些
             </p>
         </div>
 
@@ -572,36 +573,42 @@
         <div class="alarm-header">
             <div class="logo">🚽</div>
             <h1>起床！去马桶前！</h1>
-            <p>扫描马桶旁的二维码来关闭闹钟</p>
+            <p>把手机对准马桶，AI 识别到就关闭</p>
         </div>
 
         <div class="alarm-time-big" id="alarm-ring-time">07:00</div>
 
         <div class="scanner-container" id="scanner-container">
             <video id="camera-video" autoplay playsinline></video>
-            <div class="scanner-overlay">
-                <div class="scan-frame">
-                    <div class="corner tl"></div>
-                    <div class="corner tr"></div>
-                    <div class="corner bl"></div>
-                    <div class="corner br"></div>
+            <canvas id="detection-canvas"></canvas>
+            <div class="scanner-overlay"></div>
+
+            <div class="detection-status loading" id="detection-status">
+                <span class="loading-spinner"></span>
+                AI 模型加载中...
+            </div>
+
+            <div class="scan-hint">🎯 将摄像头对准马桶</div>
+
+            <div class="confidence-bar" id="confidence-bar" style="display:none;">
+                <div class="confidence-bar-label" id="confidence-label">马桶识别度: 0%</div>
+                <div class="confidence-bar-track">
+                    <div class="confidence-bar-fill" id="confidence-fill"></div>
                 </div>
             </div>
-            <div class="scan-hint">🎯 将二维码对准扫描框</div>
+
             <div class="camera-error" id="camera-error" style="display:none;">
                 <div class="icon">📷</div>
                 <p>摄像头启动失败</p>
                 <button class="retry-btn" id="retry-camera-btn">重试</button>
             </div>
         </div>
-
-        <canvas id="qr-canvas-hidden"></canvas>
     </div>
 
     <!-- ===== 成功页面 ===== -->
     <div id="success-page">
         <div class="success-icon">🎉</div>
-        <h1 class="success-title">验证成功！</h1>
+        <h1 class="success-title">识别成功！</h1>
         <p class="success-msg" id="success-msg">
             恭喜你走到了马桶前！<br>新的一天从如厕开始 🚽
         </p>
@@ -618,26 +625,17 @@
         </div>
     </div>
 
-    <!-- ===== PWA 安装提示横幅 ===== -->
+    <!-- ===== PWA 安装横幅 ===== -->
     <div id="install-banner" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,#00d2ff,#3a7bd5); color:#fff; padding:14px 24px; border-radius:16px; z-index:5000; font-size:15px; font-weight:600; box-shadow:0 8px 30px rgba(0,210,255,0.4); cursor:pointer; text-align:center; max-width:90%; animation:slideUp 0.4s ease;">
         📱 点击安装到主屏幕，像 App 一样使用！
     </div>
 
-    <style>
-        @keyframes slideUp {
-            from { transform:translateX(-50%) translateY(100px); opacity:0; }
-            to { transform:translateX(-50%) translateY(0); opacity:1; }
-        }
-    </style>
-
-    <!-- ===== Notification Permission & PWA ===== -->
+    <!-- ===== PWA & TensorFlow.js ===== -->
     <script>
-        // Request notification permission early
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
-        // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => {
@@ -646,49 +644,49 @@
             });
         }
 
-        // PWA Install Prompt
         let deferredPrompt = null;
         window.addEventListener('beforeinstallprompt', e => {
             e.preventDefault();
             deferredPrompt = e;
             const banner = document.getElementById('install-banner');
             if (banner) banner.style.display = 'block';
-
-            banner.addEventListener('click', async () => {
+            banner.onclick = async () => {
                 if (!deferredPrompt) return;
                 deferredPrompt.prompt();
-                const result = await deferredPrompt.userChoice;
+                await deferredPrompt.userChoice;
                 deferredPrompt = null;
                 banner.style.display = 'none';
-            });
+            };
         });
 
-        // Hide banner if already installed
         window.addEventListener('appinstalled', () => {
             const banner = document.getElementById('install-banner');
             if (banner) banner.style.display = 'none';
         });
     </script>
 
-    <!-- QR Code library (lightweight) -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-    <!-- QR Code scanner library -->
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <!-- TensorFlow.js + COCO-SSD -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
 
     <script>
     (() => {
         'use strict';
 
         // ===== State =====
-        let alarmTime = null;       // { hour, minute, repeatDays: [] }
-        let alarmId = '';           // unique ID for this alarm (used in QR)
+        let alarmTime = null;
         let alarmTimeout = null;
         let countdownInterval = null;
         let audioCtx = null;
         let alarmSound = null;
         let cameraStream = null;
-        let scanLoopId = null;
+        let detectLoopId = null;
         let vibrationInterval = null;
+        let cocoModel = null;
+        let modelLoaded = false;
+        let toiletDetectedFrames = 0;
+        const TOILET_CONFIDENCE_THRESHOLD = 0.4;
+        const TOILET_FRAMES_NEEDED = 15; // 需要连续检测到 N 帧才确认
 
         // ===== DOM =====
         const $ = id => document.getElementById(id);
@@ -714,7 +712,6 @@
             minuteSelect.appendChild(opt);
         }
 
-        // Default to 7:00
         hourSelect.value = 7;
         minuteSelect.value = 0;
 
@@ -730,33 +727,21 @@
             });
         });
 
-        // ===== Generate Alarm ID =====
-        function generateAlarmId() {
-            const h = String(hourSelect.value).padStart(2, '0');
-            const m = String(minuteSelect.value).padStart(2, '0');
-            const days = repeatDays.length > 0 ? repeatDays.sort().join(',') : 'once';
-            // Create a unique token
-            const token = btoa(`toilet-alarm:${h}:${m}:${days}:${Date.now()}`).replace(/[^A-Za-z0-9]/g, '').slice(0, 20);
-            return `TOILET-${token.toUpperCase()}`;
-        }
-
-        // ===== Generate QR Code =====
-        function generateQRCode(container, data) {
-            container.innerHTML = '';
+        // ===== Load COCO-SSD Model =====
+        async function loadModel() {
+            if (modelLoaded) return;
             try {
-                const qr = qrcode(0, 'M');
-                qr.addData(data);
-                qr.make();
-                const canvas = qr.createImgTag(8, 20);
-                // Use createDataURLCanvas instead
-                const qrCanvas = qr.createDataURLCanvas(8, '#000', '#fff');
-                if (qrCanvas) {
-                    container.appendChild(qrCanvas);
-                }
+                console.log('正在加载 AI 马桶识别模型...');
+                cocoModel = await cocoSsd.load();
+                modelLoaded = true;
+                console.log('AI 模型加载完成！');
             } catch (e) {
-                container.innerHTML = '<p style="color:#333;padding:20px;">QR 生成失败，请重试</p>';
+                console.error('模型加载失败:', e);
             }
         }
+
+        // Preload model on page load
+        loadModel();
 
         // ===== Navigation =====
         function showPage(page) {
@@ -776,9 +761,7 @@
 
             if (target <= now) {
                 target.setDate(target.getDate() + 1);
-                // If repeating, find next valid day
                 if (alarmTime.repeatDays && alarmTime.repeatDays.length > 0) {
-                    let daysAhead = 0;
                     for (let i = 0; i < 7; i++) {
                         const checkDay = new Date(now);
                         checkDay.setDate(checkDay.getDate() + i);
@@ -810,7 +793,6 @@
             const hour = parseInt(hourSelect.value);
             const minute = parseInt(minuteSelect.value);
 
-            // Check if alarm is in the past (for non-repeating)
             const now = new Date();
             const target = new Date(now);
             target.setHours(hour, minute, 0, 0);
@@ -821,38 +803,24 @@
             }
             $('setup-error').textContent = '';
 
-            alarmTime = {
-                hour,
-                minute,
-                repeatDays: [...repeatDays]
-            };
-            alarmId = generateAlarmId();
+            alarmTime = { hour, minute, repeatDays: [...repeatDays] };
 
-            // Save to localStorage for persistence
             localStorage.setItem('toilet-alarm', JSON.stringify({
                 ...alarmTime,
-                id: alarmId,
                 createdAt: Date.now()
             }));
 
-            // Display
             const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
             $('alarm-time-display').textContent = timeStr;
 
-            // Generate QR
-            generateQRCode($('toilet-qr'), alarmId);
-
             showPage(armedPage);
 
-            // Start countdown
             updateCountdown();
             clearInterval(countdownInterval);
             countdownInterval = setInterval(updateCountdown, 1000);
 
-            // Schedule alarm
             scheduleAlarm();
 
-            // Request notification permission
             if ('Notification' in window && Notification.permission === 'default') {
                 Notification.requestPermission();
             }
@@ -883,15 +851,7 @@
             }
 
             const delay = target - now;
-            // Set alarm 5 seconds early to account for any delays
-            alarmTimeout = setTimeout(() => {
-                triggerAlarm();
-            }, Math.max(0, delay - 5000));
-
-            // Also set a backup with Notification API if supported
-            if ('Notification' in window && Notification.permission === 'granted') {
-                // We'll check in the countdown
-            }
+            alarmTimeout = setTimeout(() => { triggerAlarm(); }, Math.max(0, delay - 5000));
         }
 
         // ===== Trigger Alarm =====
@@ -901,62 +861,44 @@
 
             showPage(alarmPage);
 
-            // Send notification
             if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification('🚽 马桶闹钟 - 起床！', {
-                    body: '快去马桶前扫描 QR Code！',
-                    icon: '🚽',
+                    body: '快去马桶前，让 AI 识别马桶！',
                     requireInteraction: true,
                     tag: 'toilet-alarm'
                 });
             }
 
-            // Start sound
             startAlarmSound();
-
-            // Start vibration pattern
             startVibration();
-
-            // Start camera
             startCamera();
-
-            // Keep screen awake with Wake Lock API
             tryWakeLock();
         }
 
-        // ===== Alarm Sound (Web Audio API) =====
+        // ===== Alarm Sound =====
         function startAlarmSound() {
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
                 function playAlarmPattern() {
                     if (!audioCtx) return;
-
                     const now = audioCtx.currentTime;
-                    // Create an annoying alarm pattern
                     for (let i = 0; i < 8; i++) {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
-
                         osc.connect(gain);
                         gain.connect(audioCtx.destination);
-
                         osc.type = 'square';
                         osc.frequency.value = i % 2 === 0 ? 800 : 600;
                         gain.gain.value = 0.15;
-
                         osc.start(now + i * 0.2);
                         osc.stop(now + i * 0.2 + 0.15);
                     }
                 }
 
-                // Play immediately and loop
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
+                if (audioCtx.state === 'suspended') audioCtx.resume();
                 playAlarmPattern();
                 alarmSound = setInterval(playAlarmPattern, 2000);
-
             } catch (e) {
                 console.warn('Audio not available:', e);
             }
@@ -965,10 +907,7 @@
         function stopAlarmSound() {
             clearInterval(alarmSound);
             alarmSound = null;
-            if (audioCtx) {
-                audioCtx.close();
-                audioCtx = null;
-            }
+            if (audioCtx) { audioCtx.close(); audioCtx = null; }
         }
 
         // ===== Vibration =====
@@ -984,9 +923,7 @@
         function stopVibration() {
             clearInterval(vibrationInterval);
             vibrationInterval = null;
-            if ('vibrate' in navigator) {
-                navigator.vibrate(0);
-            }
+            if ('vibrate' in navigator) navigator.vibrate(0);
         }
 
         // ===== Wake Lock =====
@@ -995,33 +932,49 @@
                 if ('wakeLock' in navigator) {
                     await navigator.wakeLock.request('screen');
                 }
-            } catch (e) {
-                // Ignore
-            }
+            } catch (e) {}
         }
 
-        // ===== Camera QR Scanner =====
+        // ===== Camera + AI Detection =====
         async function startCamera() {
             const video = $('camera-video');
             const errorMsg = $('camera-error');
+            const statusEl = $('detection-status');
             errorMsg.style.display = 'none';
             video.style.display = 'block';
+            statusEl.style.display = 'block';
+            statusEl.className = 'detection-status loading';
+            statusEl.innerHTML = '<span class="loading-spinner"></span> AI 模型加载中...';
 
             try {
                 cameraStream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
                     }
                 });
                 video.srcObject = cameraStream;
                 await video.play();
-                startScanning();
+
+                // Wait for model if not loaded yet
+                if (!modelLoaded) {
+                    await loadModel();
+                }
+
+                if (modelLoaded) {
+                    statusEl.className = 'detection-status searching';
+                    statusEl.innerHTML = '🔍 正在识别马桶...';
+                    toiletDetectedFrames = 0;
+                    startDetection();
+                } else {
+                    statusEl.innerHTML = '❌ AI 模型加载失败，请重试';
+                }
             } catch (e) {
                 console.warn('Camera error:', e);
                 video.style.display = 'none';
                 errorMsg.style.display = 'block';
+                statusEl.style.display = 'none';
             }
         }
 
@@ -1030,63 +983,118 @@
                 cameraStream.getTracks().forEach(t => t.stop());
                 cameraStream = null;
             }
-            cancelAnimationFrame(scanLoopId);
-            scanLoopId = null;
+            cancelAnimationFrame(detectLoopId);
+            detectLoopId = null;
         }
 
-        function startScanning() {
+        function startDetection() {
             const video = $('camera-video');
-            const canvas = $('qr-canvas-hidden');
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            const canvas = $('detection-canvas');
+            const ctx = canvas.getContext('2d');
+            const statusEl = $('detection-status');
+            const confidenceBar = $('confidence-bar');
+            const confidenceFill = $('confidence-fill');
+            const confidenceLabel = $('confidence-label');
 
-            function scanFrame() {
-                if (!video.videoWidth || !video.videoHeight) {
-                    scanLoopId = requestAnimationFrame(scanFrame);
+            let lastDetectionTime = 0;
+
+            async function detectFrame() {
+                if (!video.videoWidth || !video.videoHeight || !modelLoaded) {
+                    detectLoopId = requestAnimationFrame(detectFrame);
                     return;
                 }
 
+                // Throttle detection to ~5fps to save battery
+                const now = performance.now();
+                if (now - lastDetectionTime < 200) {
+                    detectLoopId = requestAnimationFrame(detectFrame);
+                    return;
+                }
+                lastDetectionTime = now;
+
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
-                ctx.drawImage(video, 0, 0);
 
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: 'dontInvert'
+                // Run detection
+                const predictions = await cocoModel.detect(video, 10);
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                let toiletFound = false;
+                let maxConfidence = 0;
+
+                // COCO-SSD class 44 is "toilet"
+                // Classes: person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, fire hydrant, stop sign, parking meter, bench, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe, backpack, umbrella, handbag, tie, suitcase, frisbee, skis, snowboard, sports ball, kite, baseball bat, baseball glove, skateboard, surfboard, tennis racket, bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake, chair, couch, potted plant, bed, dining table, toilet, TV, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair drier, toothbrush
+                predictions.forEach(pred => {
+                    if (pred.class === 'toilet' && pred.score >= TOILET_CONFIDENCE_THRESHOLD) {
+                        toiletFound = true;
+                        maxConfidence = Math.max(maxConfidence, pred.score);
+
+                        // Draw bounding box
+                        const [x, y, w, h] = pred.bbox;
+                        ctx.strokeStyle = '#4caf50';
+                        ctx.lineWidth = 4;
+                        ctx.strokeRect(x, y, w, h);
+
+                        ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
+                        ctx.fillRect(x, y, w, h);
+
+                        // Label
+                        ctx.fillStyle = '#4caf50';
+                        ctx.font = 'bold 24px sans-serif';
+                        ctx.fillText(`🚽 马桶 ${(pred.score * 100).toFixed(0)}%`, x, y > 30 ? y - 8 : y + 24);
+                    }
                 });
 
-                if (code && code.data) {
-                    // Check if the scanned code matches our alarm ID
-                    if (code.data === alarmId || code.data.includes(alarmId)) {
-                        onQRScanned();
+                if (toiletFound) {
+                    toiletDetectedFrames++;
+
+                    // Update confidence bar
+                    confidenceBar.style.display = 'block';
+                    confidenceFill.style.width = (maxConfidence * 100).toFixed(0) + '%';
+                    confidenceLabel.textContent = `马桶识别度: ${(maxConfidence * 100).toFixed(0)}% (${toiletDetectedFrames}/${TOILET_FRAMES_NEEDED})`;
+
+                    statusEl.className = 'detection-status found';
+                    statusEl.innerHTML = `✅ 检测到马桶！${toiletDetectedFrames}/${TOILET_FRAMES_NEEDED}`;
+
+                    if (toiletDetectedFrames >= TOILET_FRAMES_NEEDED) {
+                        onToiletDetected();
                         return;
                     }
+                } else {
+                    toiletDetectedFrames = Math.max(0, toiletDetectedFrames - 1);
+                    confidenceBar.style.display = maxConfidence > 0 ? 'block' : 'none';
+                    if (maxConfidence > 0) {
+                        confidenceFill.style.width = '0%';
+                        confidenceLabel.textContent = '未检测到马桶';
+                    }
+                    statusEl.className = 'detection-status searching';
+                    statusEl.innerHTML = '🔍 正在识别马桶...';
                 }
 
-                scanLoopId = requestAnimationFrame(scanFrame);
+                detectLoopId = requestAnimationFrame(detectFrame);
             }
 
-            scanLoopId = requestAnimationFrame(scanFrame);
+            detectLoopId = requestAnimationFrame(detectFrame);
         }
 
-        // ===== QR Scanned Successfully =====
-        function onQRScanned() {
-            // Stop everything
+        // ===== Toilet Detected =====
+        function onToiletDetected() {
             stopAlarmSound();
             stopVibration();
             stopCamera();
 
-            // Update success message with time
             const now = new Date();
             const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             $('success-msg').innerHTML = `
                 恭喜你在 <strong>${timeStr}</strong> 成功走到了马桶前！<br>
-                新的一天从如厕开始 🚽✨
+                AI 已确认你看到了马桶 🚽✨<br>
+                新的一天从如厕开始！
             `;
 
-            // Clear or reschedule alarm
             const saved = JSON.parse(localStorage.getItem('toilet-alarm') || 'null');
             if (saved && saved.repeatDays && saved.repeatDays.length > 0) {
-                // Keep repeating alarm
                 scheduleAlarm();
             } else {
                 localStorage.removeItem('toilet-alarm');
@@ -1096,9 +1104,7 @@
         }
 
         // ===== Retry Camera =====
-        $('retry-camera-btn').addEventListener('click', () => {
-            startCamera();
-        });
+        $('retry-camera-btn').addEventListener('click', () => { startCamera(); });
 
         // ===== Cancel Alarm =====
         $('cancel-alarm-btn').addEventListener('click', () => {
@@ -1107,7 +1113,6 @@
                 clearInterval(countdownInterval);
                 localStorage.removeItem('toilet-alarm');
                 alarmTime = null;
-                alarmId = '';
                 showPage(setupPage);
             });
         });
@@ -1117,17 +1122,14 @@
             const saved = JSON.parse(localStorage.getItem('toilet-alarm') || 'null');
             if (saved && saved.repeatDays && saved.repeatDays.length > 0) {
                 alarmTime = saved;
-                alarmId = saved.id;
                 const timeStr = `${String(saved.hour).padStart(2, '0')}:${String(saved.minute).padStart(2, '0')}`;
                 $('alarm-time-display').textContent = timeStr;
-                generateQRCode($('toilet-qr'), alarmId);
                 showPage(armedPage);
                 updateCountdown();
                 clearInterval(countdownInterval);
                 countdownInterval = setInterval(updateCountdown, 1000);
             } else {
                 alarmTime = null;
-                alarmId = '';
                 showPage(setupPage);
             }
         });
@@ -1152,30 +1154,25 @@
             };
         }
 
-        // ===== Restore Alarm from Storage =====
+        // ===== Restore Alarm =====
         function restoreAlarm() {
             const saved = JSON.parse(localStorage.getItem('toilet-alarm') || 'null');
             if (!saved) return;
 
             alarmTime = saved;
-            alarmId = saved.id;
 
-            // Check if alarm time has passed (for non-repeating)
             const now = new Date();
             let target = new Date(now);
             target.setHours(saved.hour, saved.minute, 0, 0);
 
             if (target <= now && (!saved.repeatDays || saved.repeatDays.length === 0)) {
-                // Check if it's within the same minute window (5 min grace)
                 const diff = now - target;
                 if (diff > 300000) {
-                    // Too late, clear
                     localStorage.removeItem('toilet-alarm');
                     return;
                 }
             }
 
-            // Restore repeat day selections
             if (saved.repeatDays) {
                 saved.repeatDays.forEach(day => {
                     const btn = document.querySelector(`.repeat-day[data-day="${day}"]`);
@@ -1188,8 +1185,6 @@
             hourSelect.value = saved.hour;
             minuteSelect.value = saved.minute;
 
-            generateQRCode($('toilet-qr'), alarmId);
-
             showPage(armedPage);
             updateCountdown();
             clearInterval(countdownInterval);
@@ -1198,7 +1193,7 @@
             scheduleAlarm();
         }
 
-        // ===== Visibility Change - re-check alarm =====
+        // ===== Visibility Change =====
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && alarmTime) {
                 const now = new Date();
@@ -1206,11 +1201,8 @@
                 const m = now.getMinutes();
 
                 if (h === alarmTime.hour && m === alarmTime.minute) {
-                    // Check repeat days
                     if (alarmTime.repeatDays && alarmTime.repeatDays.length > 0) {
-                        if (alarmTime.repeatDays.includes(now.getDay())) {
-                            triggerAlarm();
-                        }
+                        if (alarmTime.repeatDays.includes(now.getDay())) triggerAlarm();
                     } else {
                         triggerAlarm();
                     }
@@ -1218,7 +1210,7 @@
             }
         });
 
-        // ===== Cleanup on page unload =====
+        // ===== Cleanup =====
         window.addEventListener('beforeunload', () => {
             stopAlarmSound();
             stopVibration();
