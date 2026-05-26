@@ -121,39 +121,84 @@
             max-width: 400px;
         }
 
-        .time-picker-wrapper {
+        /* ===== 滚动时间选择器 ===== */
+        .time-picker-container {
             display: flex;
             justify-content: center;
-            gap: 12px;
             align-items: center;
+            gap: 8px;
             margin-bottom: 32px;
-        }
-
-        .time-picker-wrapper select {
-            font-size: 52px;
-            font-weight: 700;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 16px 20px;
-            appearance: none;
-            -webkit-appearance: none;
-            text-align: center;
-            cursor: pointer;
-            min-width: 100px;
+        }
+
+        .picker-column {
+            position: relative;
+            width: 80px;
+            height: 200px;
+            overflow: hidden;
+            mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+        }
+
+        .picker-list {
+            position: relative;
+            height: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            height: 200px;
+        }
+
+        .picker-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .picker-item {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.25);
             transition: all 0.2s ease;
+            scroll-snap-align: center;
+            user-select: none;
+            cursor: pointer;
         }
 
-        .time-picker-wrapper select:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(99, 102, 241, 0.3);
+        .picker-item.active {
+            color: var(--text-primary);
+            transform: scale(1.15);
         }
 
-        .time-picker-wrapper select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        .picker-item.near {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .picker-selection-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 44px;
+            transform: translateY(-50%);
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .picker-colon {
+            font-size: 48px;
+            font-weight: 300;
+            color: var(--primary-light);
+            padding: 0 4px;
         }
 
         .time-colon {
@@ -749,10 +794,16 @@
 
         <div class="card">
             <p class="label">设定闹钟时间</p>
-            <div class="time-picker-wrapper">
-                <select id="hour-select"></select>
-                <span class="time-colon">:</span>
-                <select id="minute-select"></select>
+            <div class="time-picker-container">
+                <div class="picker-column" id="hour-picker">
+                    <div class="picker-selection-line"></div>
+                    <div class="picker-list" id="hour-list"></div>
+                </div>
+                <span class="picker-colon">:</span>
+                <div class="picker-column" id="minute-picker">
+                    <div class="picker-selection-line"></div>
+                    <div class="picker-list" id="minute-list"></div>
+                </div>
             </div>
 
             <p class="label">重复</p>
@@ -933,25 +984,80 @@
         const alarmPage = $('alarm-page');
         const successPage = $('success-page');
 
-        // ===== Init Time Picker =====
-        const hourSelect = $('hour-select');
-        const minuteSelect = $('minute-select');
+        // ===== Init Scroll Time Picker =====
+        const hourList = $('hour-list');
+        const minuteList = $('minute-list');
+        let selectedHour = 7;
+        let selectedMinute = 0;
+        const ITEM_HEIGHT = 40;
 
-        for (let h = 0; h < 24; h++) {
-            const opt = document.createElement('option');
-            opt.value = h;
-            opt.textContent = String(h).padStart(2, '0');
-            hourSelect.appendChild(opt);
-        }
-        for (let m = 0; m < 60; m += 5) {
-            const opt = document.createElement('option');
-            opt.value = m;
-            opt.textContent = String(m).padStart(2, '0');
-            minuteSelect.appendChild(opt);
+        function createPicker(list, items, defaultIndex, onSelect) {
+            // Add padding items at top and bottom
+            const padding = 10;
+            for (let i = 0; i < padding; i++) {
+                const spacer = document.createElement('div');
+                spacer.className = 'picker-item';
+                spacer.style.visibility = 'hidden';
+                list.appendChild(spacer);
+            }
+
+            items.forEach((val, idx) => {
+                const item = document.createElement('div');
+                item.className = 'picker-item';
+                item.textContent = val;
+                item.dataset.index = idx;
+                item.addEventListener('click', () => {
+                    list.scrollTop = idx * ITEM_HEIGHT;
+                    onSelect(idx);
+                });
+                list.appendChild(item);
+            });
+
+            for (let i = 0; i < padding; i++) {
+                const spacer = document.createElement('div');
+                spacer.className = 'picker-item';
+                spacer.style.visibility = 'hidden';
+                list.appendChild(spacer);
+            }
+
+            // Set initial position
+            list.scrollTop = defaultIndex * ITEM_HEIGHT;
+
+            // Scroll end handler
+            list.addEventListener('scroll', () => {
+                const idx = Math.round(list.scrollTop / ITEM_HEIGHT);
+                if (idx >= 0 && idx < items.length) {
+                    onSelect(idx);
+                    updateActiveItem(list, idx);
+                }
+            });
+
+            // Init active state
+            updateActiveItem(list, defaultIndex);
         }
 
-        hourSelect.value = 7;
-        minuteSelect.value = 0;
+        function updateActiveItem(list, activeIdx) {
+            const items = list.querySelectorAll('.picker-item');
+            const padding = 10;
+            items.forEach((item, i) => {
+                const idx = i - padding;
+                if (idx < 0 || idx >= 24) return; // skip padding
+                item.classList.remove('active', 'near');
+                if (idx === activeIdx) {
+                    item.classList.add('active');
+                } else if (Math.abs(idx - activeIdx) === 1) {
+                    item.classList.add('near');
+                }
+            });
+        }
+
+        // Create hour picker (0-23)
+        const hours = Array.from({length: 24}, (_, i) => String(i).padStart(2, '0'));
+        createPicker(hourList, hours, 7, (idx) => { selectedHour = idx; });
+
+        // Create minute picker (0, 5, 10, ... 55)
+        const minutes = Array.from({length: 12}, (_, i) => String(i * 5).padStart(2, '0'));
+        createPicker(minuteList, minutes, 0, (idx) => { selectedMinute = idx * 5; });
 
         // Repeat days
         const repeatDays = [];
@@ -1038,8 +1144,8 @@
 
         // ===== Set Alarm =====
         $('set-alarm-btn').addEventListener('click', () => {
-            const hour = parseInt(hourSelect.value);
-            const minute = parseInt(minuteSelect.value);
+            const hour = selectedHour;
+            const minute = selectedMinute;
 
             const now = new Date();
             const target = new Date(now);
@@ -1445,8 +1551,10 @@
 
             const timeStr = `${String(saved.hour).padStart(2, '0')}:${String(saved.minute).padStart(2, '0')}`;
             $('alarm-time-display').textContent = timeStr;
-            hourSelect.value = saved.hour;
-            minuteSelect.value = saved.minute;
+            selectedHour = saved.hour;
+            selectedMinute = saved.minute;
+            hourList.scrollTop = saved.hour * ITEM_HEIGHT;
+            minuteList.scrollTop = (saved.minute / 5) * ITEM_HEIGHT;
 
             showPage(armedPage);
             updateCountdown();
