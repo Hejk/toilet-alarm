@@ -563,8 +563,11 @@
             </p>
         </div>
 
-        <div style="margin-top: 30px; width: 100%; max-width: 380px;">
+        <div style="margin-top: 30px; width: 100%; max-width: 380px;" id="cancel-btn-container">
             <button class="btn btn-danger" id="cancel-alarm-btn">❌ 取消闹钟</button>
+        </div>
+        <div id="locked-msg" style="display:none; margin-top: 20px; color: #ff416c; font-size: 14px; text-align: center;">
+            🔒 闹钟即将响起，已锁定无法取消
         </div>
     </div>
 
@@ -577,6 +580,14 @@
         </div>
 
         <div class="alarm-time-big" id="alarm-ring-time">07:00</div>
+
+        <!-- iOS 需要用户交互才能播放声音 -->
+        <div id="start-alarm-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(10,10,26,0.95); z-index:5000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center;">
+            <div style="font-size:80px; margin-bottom:20px;">⏰</div>
+            <h2 style="font-size:28px; margin-bottom:15px; color:#ff416c;">闹钟响了！</h2>
+            <p style="color:#aaa; margin-bottom:40px; line-height:1.6;">点击开启闹钟声音<br>然后去马桶前让 AI 识别</p>
+            <button class="btn btn-danger" id="start-alarm-btn" style="max-width:300px; font-size:22px; padding:20px 40px;">🔔 开启闹钟</button>
+        </div>
 
         <div class="scanner-container" id="scanner-container">
             <video id="camera-video" autoplay playsinline></video>
@@ -786,6 +797,16 @@
                 text += `（重复：${repeatText}）`;
             }
             $('countdown-display').textContent = text;
+
+            // 闹钟响前 5 分钟锁定取消按钮
+            const LOCK_BEFORE_MS = 5 * 60 * 1000; // 5分钟
+            if (diff <= LOCK_BEFORE_MS) {
+                $('cancel-btn-container').style.display = 'none';
+                $('locked-msg').style.display = 'block';
+            } else {
+                $('cancel-btn-container').style.display = 'block';
+                $('locked-msg').style.display = 'none';
+            }
         }
 
         // ===== Set Alarm =====
@@ -861,6 +882,9 @@
 
             showPage(alarmPage);
 
+            // 显示启动覆盖层（iOS 需要用户交互才能播放声音）
+            $('start-alarm-overlay').style.display = 'flex';
+
             if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification('🚽 马桶闹钟 - 起床！', {
                     body: '快去马桶前，让 AI 识别马桶！',
@@ -869,16 +893,29 @@
                 });
             }
 
-            startAlarmSound();
-            startVibration();
-            startCamera();
+            // 不自动启动声音和摄像头，等待用户点击
             tryWakeLock();
         }
 
+        // ===== 用户点击开启闹钟按钮 =====
+        $('start-alarm-btn').addEventListener('click', async () => {
+            $('start-alarm-overlay').style.display = 'none';
+
+            // iOS 需要用户交互后才能播放声音
+            await startAlarmSound();
+            startVibration();
+            startCamera();
+        });
+
         // ===== Alarm Sound =====
-        function startAlarmSound() {
+        async function startAlarmSound() {
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                // iOS 需要用户交互后才能 resume AudioContext
+                if (audioCtx.state === 'suspended') {
+                    await audioCtx.resume();
+                }
 
                 function playAlarmPattern() {
                     if (!audioCtx) return;
@@ -890,13 +927,12 @@
                         gain.connect(audioCtx.destination);
                         osc.type = 'square';
                         osc.frequency.value = i % 2 === 0 ? 800 : 600;
-                        gain.gain.value = 0.15;
+                        gain.gain.value = 0.3; // 增加音量
                         osc.start(now + i * 0.2);
                         osc.stop(now + i * 0.2 + 0.15);
                     }
                 }
 
-                if (audioCtx.state === 'suspended') audioCtx.resume();
                 playAlarmPattern();
                 alarmSound = setInterval(playAlarmPattern, 2000);
             } catch (e) {
