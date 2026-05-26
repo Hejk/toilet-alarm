@@ -1,0 +1,25 @@
+{
+    "name": "马桶闹钟",
+    "short_name": "马桶闹钟",
+    "description": "必须走到马桶前才能关闭的闹钟",
+    "start_url": "./toilet-alarm.html",
+    "display": "standalone",
+    "background_color": "#0a0a1a",
+    "theme_color": "#00d2ff",
+    "orientation": "portrait",
+    "lang": "zh-CN",
+    "icons": [
+        {
+            "src": "./icon-192.jpg",
+            "sizes": "1024x1024",
+            "type": "image/jpeg",
+            "purpose": "any"
+        },
+        {
+            "src": "./icon-512.jpg",
+            "sizes": "512x512",
+            "type": "image/jpeg",
+            "purpose": "any"
+        }
+    ]
+}

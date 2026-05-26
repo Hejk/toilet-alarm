@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="马桶闹钟">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/jpeg" href="./icon-192.jpg">
+    <link rel="apple-touch-icon" href="./icon-192.jpg">
+    <link rel="icon" href="./icon-192.jpg" type="image/jpeg">
+    <meta name="theme-color" content="#0a0a1a">
+    <title>🚽 马桶闹钟</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== 主设置页面 ===== */
+        #setup-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .logo {
+            font-size: 80px;
+            margin-bottom: 10px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .app-title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .app-subtitle {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 40px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 380px;
+            backdrop-filter: blur(10px);
+        }
+
+        .time-picker-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .time-picker-wrapper select {
+            font-size: 48px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: 2px solid rgba(0, 210, 255, 0.3);
+            border-radius: 16px;
+            padding: 15px 20px;
+            appearance: none;
+            -webkit-appearance: none;
+            text-align: center;
+            cursor: pointer;
+            min-width: 100px;
+        }
+
+        .time-picker-wrapper select:focus {
+            outline: none;
+            border-color: #00d2ff;
+        }
+
+        .time-colon {
+            font-size: 48px;
+            font-weight: 700;
+            color: #00d2ff;
+        }
+
+        .label {
+            font-size: 13px;
+            color: #aaa;
+            text-align: center;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            box-shadow: 0 8px 30px rgba(0, 210, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 210, 255, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: #fff;
+            box-shadow: 0 8px 30px rgba(255, 65, 108, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===== 闹钟已设定页面 ===== */
+        #armed-page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .alarm-display {
+            font-size: 72px;
+            font-weight: 800;
+            color: #00d2ff;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 10px;
+        }
+
+        .countdown-display {
+            font-size: 20px;
+            color: #888;
+            margin-bottom: 40px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .qr-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .qr-section h3 {
+            font-size: 16px;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        #toilet-qr {
+            background: #fff;
+            padding: 15px;
+            border-radius: 16px;
+            display: inline-block;
+        }
+
+        .qr-hint {
+            font-size: 13px;
+            color: #666;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        /* ===== 闹钟响铃页面 ===== */
+        #alarm-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a1a;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .alarm-header {
+            text-align: center;
+            padding: 30px 20px 10px;
+        }
+
+        .alarm-header .logo {
+            font-size: 60px;
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+
+        .alarm-header h1 {
+            font-size: 24px;
+            color: #ff416c;
+            margin-bottom: 5px;
+        }
+
+        .alarm-header p {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .alarm-time-big {
+            font-size: 64px;
+            font-weight: 800;
+            text-align: center;
+            color: #ff416c;
+            font-variant-numeric: tabular-nums;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .scanner-container {
+            flex: 1;
+            position: relative;
+            margin: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid rgba(0, 210, 255, 0.4);
+            background: #000;
+        }
+
+        #camera-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .scan-frame {
+            width: 220px;
+            height: 220px;
+            border: 3px solid rgba(0, 210, 255, 0.8);
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 210, 255, 0.2);
+        }
+
+        .scan-frame::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 20px;
+            right: 20px;
+            height: 3px;
+            background: #00d2ff;
+            animation: scan-line 2s ease-in-out infinite;
+        }
+
+        @keyframes scan-line {
+            0% { top: -3px; }
+            50% { top: calc(100% - 3px); }
+            100% { top: -3px; }
+        }
+
+        .scan-hint {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            color: #00d2ff;
+            white-space: nowrap;
+        }
+
+        .corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: #00d2ff;
+            border-style: solid;
+        }
+        .corner.tl { top: -2px; left: -2px; border-width: 4px 0 0 4px; border-radius: 8px 0 0 0; }
+        .corner.tr { top: -2px; right: -2px; border-width: 4px 4px 0 0; border-radius: 0 8px 0 0; }
+        .corner.bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; border-radius: 0 0 0 8px; }
+        .corner.br { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; border-radius: 0 0 8px 0; }
+
+        /* ===== 成功页面 ===== */
+        #success-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a560a, #0a0a1a);
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 100px;
+            animation: success-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes success-pop {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .success-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #4caf50;
+            margin: 20px 0 10px;
+        }
+
+        .success-msg {
+            font-size: 16px;
+            color: #aaa;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* ===== 提示弹窗 ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #1a1a2e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+        }
+
+        .modal h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .modal p {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal .btn {
+            margin-top: 5px;
+        }
+
+        /* ===== 状态栏 ===== */
+        .status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #555;
+            z-index: 100;
+        }
+
+        /* ===== 重复设置 ===== */
+        .repeat-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .repeat-day {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            background: transparent;
+            color: #aaa;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .repeat-day.active {
+            border-color: #00d2ff;
+            background: rgba(0, 210, 255, 0.15);
+            color: #00d2ff;
+        }
+
+        .repeat-day:hover {
+            border-color: rgba(0, 210, 255, 0.5);
+        }
+
+        /* ===== 隐藏canvas ===== */
+        #qr-canvas-hidden {
+            display: none;
+        }
+
+        /* ===== 错误提示 ===== */
+        .error-msg {
+            color: #ff416c;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        .camera-error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #aaa;
+        }
+
+        .camera-error .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .retry-btn {
+            margin-top: 15px;
+            padding: 10px 24px;
+            background: rgba(0, 210, 255, 0.15);
+            border: 1px solid #00d2ff;
+            color: #00d2ff;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== 设置页面 ===== -->
+    <div id="setup-page">
+        <div class="logo">🚽</div>
+        <h1 class="app-title">马桶闹钟</h1>
+        <p class="app-subtitle">必须走到马桶前才能关闭的闹钟<br>再也不会按掉闹钟继续睡了！</p>
+
+        <div class="card">
+            <p class="label">设定闹钟时间</p>
+            <div class="time-picker-wrapper">
+                <select id="hour-select"></select>
+                <span class="time-colon">:</span>
+                <select id="minute-select"></select>
+            </div>
+
+            <p class="label">重复</p>
+            <div class="repeat-wrapper">
+                <button class="repeat-day" data-day="1">一</button>
+                <button class="repeat-day" data-day="2">二</button>
+                <button class="repeat-day" data-day="3">三</button>
+                <button class="repeat-day" data-day="4">四</button>
+                <button class="repeat-day" data-day="5">五</button>
+                <button class="repeat-day" data-day="6">六</button>
+                <button class="repeat-day" data-day="0">日</button>
+            </div>
+
+            <button class="btn btn-primary" id="set-alarm-btn">⏰ 设定闹钟</button>
+            <p class="error-msg" id="setup-error"></p>
+        </div>
+    </div>
+
+    <!-- ===== 闹钟已设定页面 ===== -->
+    <div id="armed-page">
+        <div class="logo">⏰</div>
+        <h1 class="app-title">闹钟已设定</h1>
+        <div class="alarm-display" id="alarm-time-display">07:00</div>
+        <div class="countdown-display" id="countdown-display">距离闹钟还有 --</div>
+
+        <div class="card qr-section">
+            <h3>📱 你的马桶专属二维码</h3>
+            <div id="toilet-qr"></div>
+            <p class="qr-hint">
+                请截图并打印此二维码<br>贴在马桶旁边（马桶盖/水箱/墙壁）<br>
+                闹钟响起后需扫描此码才能关闭
+            </p>
+        </div>
+
+        <div style="margin-top: 30px; width: 100%; max-width: 380px;">
+            <button class="btn btn-danger" id="cancel-alarm-btn">❌ 取消闹钟</button>
+        </div>
+    </div>
+
+    <!-- ===== 闹钟响铃页面 ===== -->
+    <div id="alarm-page">
+        <div class="alarm-header">
+            <div class="logo">🚽</div>
+            <h1>起床！去马桶前！</h1>
+            <p>扫描马桶旁的二维码来关闭闹钟</p>
+        </div>
+
+        <div class="alarm-time-big" id="alarm-ring-time">07:00</div>
+
+        <div class="scanner-container" id="scanner-container">
+            <video id="camera-video" autoplay playsinline></video>
+            <div class="scanner-overlay">
+                <div class="scan-frame">
+                    <div class="corner tl"></div>
+                    <div class="corner tr"></div>
+                    <div class="corner bl"></div>
+                    <div class="corner br"></div>
+                </div>
+            </div>
+            <div class="scan-hint">🎯 将二维码对准扫描框</div>
+            <div class="camera-error" id="camera-error" style="display:none;">
+                <div class="icon">📷</div>
+                <p>摄像头启动失败</p>
+                <button class="retry-btn" id="retry-camera-btn">重试</button>
+            </div>
+        </div>
+
+        <canvas id="qr-canvas-hidden"></canvas>
+    </div>
+
+    <!-- ===== 成功页面 ===== -->
+    <div id="success-page">
+        <div class="success-icon">🎉</div>
+        <h1 class="success-title">验证成功！</h1>
+        <p class="success-msg" id="success-msg">
+            恭喜你走到了马桶前！<br>新的一天从如厕开始 🚽
+        </p>
+        <button class="btn btn-primary" id="back-to-setup-btn" style="max-width: 380px;">✅ 完成</button>
+    </div>
+
+    <!-- ===== 确认弹窗 ===== -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal">
+            <h3 id="modal-title">确认</h3>
+            <p id="modal-msg">确定要执行此操作吗？</p>
+            <button class="btn btn-danger" id="modal-confirm" style="margin-bottom: 10px;">确认</button>
+            <button class="btn btn-secondary" id="modal-cancel">取消</button>
+        </div>
+    </div>
+
+    <!-- ===== PWA 安装提示横幅 ===== -->
+    <div id="install-banner" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,#00d2ff,#3a7bd5); color:#fff; padding:14px 24px; border-radius:16px; z-index:5000; font-size:15px; font-weight:600; box-shadow:0 8px 30px rgba(0,210,255,0.4); cursor:pointer; text-align:center; max-width:90%; animation:slideUp 0.4s ease;">
+        📱 点击安装到主屏幕，像 App 一样使用！
+    </div>
+
+    <style>
+        @keyframes slideUp {
+            from { transform:translateX(-50%) translateY(100px); opacity:0; }
+            to { transform:translateX(-50%) translateY(0); opacity:1; }
+        }
+    </style>
+
+    <!-- ===== Notification Permission & PWA ===== -->
+    <script>
+        // Request notification permission early
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => {
+                    console.warn('Service Worker 注册失败:', err);
+                });
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const banner = document.getElementById('install-banner');
+            if (banner) banner.style.display = 'block';
+
+            banner.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                const result = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                banner.style.display = 'none';
+            });
+        });
+
+        // Hide banner if already installed
+        window.addEventListener('appinstalled', () => {
+            const banner = document.getElementById('install-banner');
+            if (banner) banner.style.display = 'none';
+        });
+    </script>
+
+    <!-- QR Code library (lightweight) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <!-- QR Code scanner library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
+    <script>
+    (() => {
+        'use strict';
+
+        // ===== State =====
+        let alarmTime = null;       // { hour, minute, repeatDays: [] }
+        let alarmId = '';           // unique ID for this alarm (used in QR)
+        let alarmTimeout = null;
+        let countdownInterval = null;
+        let audioCtx = null;
+        let alarmSound = null;
+        let cameraStream = null;
+        let scanLoopId = null;
+        let vibrationInterval = null;
+
+        // ===== DOM =====
+        const $ = id => document.getElementById(id);
+        const setupPage = $('setup-page');
+        const armedPage = $('armed-page');
+        const alarmPage = $('alarm-page');
+        const successPage = $('success-page');
+
+        // ===== Init Time Picker =====
+        const hourSelect = $('hour-select');
+        const minuteSelect = $('minute-select');
+
+        for (let h = 0; h < 24; h++) {
+            const opt = document.createElement('option');
+            opt.value = h;
+            opt.textContent = String(h).padStart(2, '0');
+            hourSelect.appendChild(opt);
+        }
+        for (let m = 0; m < 60; m += 5) {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = String(m).padStart(2, '0');
+            minuteSelect.appendChild(opt);
+        }
+
+        // Default to 7:00
+        hourSelect.value = 7;
+        minuteSelect.value = 0;
+
+        // Repeat days
+        const repeatDays = [];
+        document.querySelectorAll('.repeat-day').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const day = parseInt(btn.dataset.day);
+                btn.classList.toggle('active');
+                const idx = repeatDays.indexOf(day);
+                if (idx > -1) repeatDays.splice(idx, 1);
+                else repeatDays.push(day);
+            });
+        });
+
+        // ===== Generate Alarm ID =====
+        function generateAlarmId() {
+            const h = String(hourSelect.value).padStart(2, '0');
+            const m = String(minuteSelect.value).padStart(2, '0');
+            const days = repeatDays.length > 0 ? repeatDays.sort().join(',') : 'once';
+            // Create a unique token
+            const token = btoa(`toilet-alarm:${h}:${m}:${days}:${Date.now()}`).replace(/[^A-Za-z0-9]/g, '').slice(0, 20);
+            return `TOILET-${token.toUpperCase()}`;
+        }
+
+        // ===== Generate QR Code =====
+        function generateQRCode(container, data) {
+            container.innerHTML = '';
+            try {
+                const qr = qrcode(0, 'M');
+                qr.addData(data);
+                qr.make();
+                const canvas = qr.createImgTag(8, 20);
+                // Use createDataURLCanvas instead
+                const qrCanvas = qr.createDataURLCanvas(8, '#000', '#fff');
+                if (qrCanvas) {
+                    container.appendChild(qrCanvas);
+                }
+            } catch (e) {
+                container.innerHTML = '<p style="color:#333;padding:20px;">QR 生成失败，请重试</p>';
+            }
+        }
+
+        // ===== Navigation =====
+        function showPage(page) {
+            setupPage.style.display = 'none';
+            armedPage.style.display = 'none';
+            alarmPage.style.display = 'none';
+            successPage.style.display = 'none';
+            page.style.display = 'flex';
+        }
+
+        // ===== Countdown =====
+        function updateCountdown() {
+            if (!alarmTime) return;
+            const now = new Date();
+            let target = new Date(now);
+            target.setHours(alarmTime.hour, alarmTime.minute, 0, 0);
+
+            if (target <= now) {
+                target.setDate(target.getDate() + 1);
+                // If repeating, find next valid day
+                if (alarmTime.repeatDays && alarmTime.repeatDays.length > 0) {
+                    let daysAhead = 0;
+                    for (let i = 0; i < 7; i++) {
+                        const checkDay = new Date(now);
+                        checkDay.setDate(checkDay.getDate() + i);
+                        checkDay.setHours(alarmTime.hour, alarmTime.minute, 0, 0);
+                        if (checkDay > now && alarmTime.repeatDays.includes(checkDay.getDay())) {
+                            target = checkDay;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const diff = target - now;
+            const hours = Math.floor(diff / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+
+            let text = `距离闹钟还有 ${hours}小时${mins}分${secs}秒`;
+            if (alarmTime.repeatDays && alarmTime.repeatDays.length > 0) {
+                const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+                const repeatText = alarmTime.repeatDays.sort().map(d => '周' + dayNames[d]).join('、');
+                text += `（重复：${repeatText}）`;
+            }
+            $('countdown-display').textContent = text;
+        }
+
+        // ===== Set Alarm =====
+        $('set-alarm-btn').addEventListener('click', () => {
+            const hour = parseInt(hourSelect.value);
+            const minute = parseInt(minuteSelect.value);
+
+            // Check if alarm is in the past (for non-repeating)
+            const now = new Date();
+            const target = new Date(now);
+            target.setHours(hour, minute, 0, 0);
+
+            if (target <= now && repeatDays.length === 0) {
+                $('setup-error').textContent = '⚠️ 请设定一个未来的时间';
+                return;
+            }
+            $('setup-error').textContent = '';
+
+            alarmTime = {
+                hour,
+                minute,
+                repeatDays: [...repeatDays]
+            };
+            alarmId = generateAlarmId();
+
+            // Save to localStorage for persistence
+            localStorage.setItem('toilet-alarm', JSON.stringify({
+                ...alarmTime,
+                id: alarmId,
+                createdAt: Date.now()
+            }));
+
+            // Display
+            const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+            $('alarm-time-display').textContent = timeStr;
+
+            // Generate QR
+            generateQRCode($('toilet-qr'), alarmId);
+
+            showPage(armedPage);
+
+            // Start countdown
+            updateCountdown();
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(updateCountdown, 1000);
+
+            // Schedule alarm
+            scheduleAlarm();
+
+            // Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        });
+
+        // ===== Schedule Alarm =====
+        function scheduleAlarm() {
+            clearTimeout(alarmTimeout);
+
+            const now = new Date();
+            let target = new Date(now);
+            target.setHours(alarmTime.hour, alarmTime.minute, 0, 0);
+
+            if (target <= now) {
+                if (alarmTime.repeatDays && alarmTime.repeatDays.length > 0) {
+                    for (let i = 0; i <= 7; i++) {
+                        const checkDay = new Date(now);
+                        checkDay.setDate(checkDay.getDate() + i);
+                        checkDay.setHours(alarmTime.hour, alarmTime.minute, 0, 0);
+                        if (checkDay > now && alarmTime.repeatDays.includes(checkDay.getDay())) {
+                            target = checkDay;
+                            break;
+                        }
+                    }
+                } else {
+                    target.setDate(target.getDate() + 1);
+                }
+            }
+
+            const delay = target - now;
+            // Set alarm 5 seconds early to account for any delays
+            alarmTimeout = setTimeout(() => {
+                triggerAlarm();
+            }, Math.max(0, delay - 5000));
+
+            // Also set a backup with Notification API if supported
+            if ('Notification' in window && Notification.permission === 'granted') {
+                // We'll check in the countdown
+            }
+        }
+
+        // ===== Trigger Alarm =====
+        function triggerAlarm() {
+            const timeStr = `${String(alarmTime.hour).padStart(2, '0')}:${String(alarmTime.minute).padStart(2, '0')}`;
+            $('alarm-ring-time').textContent = timeStr;
+
+            showPage(alarmPage);
+
+            // Send notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('🚽 马桶闹钟 - 起床！', {
+                    body: '快去马桶前扫描 QR Code！',
+                    icon: '🚽',
+                    requireInteraction: true,
+                    tag: 'toilet-alarm'
+                });
+            }
+
+            // Start sound
+            startAlarmSound();
+
+            // Start vibration pattern
+            startVibration();
+
+            // Start camera
+            startCamera();
+
+            // Keep screen awake with Wake Lock API
+            tryWakeLock();
+        }
+
+        // ===== Alarm Sound (Web Audio API) =====
+        function startAlarmSound() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                function playAlarmPattern() {
+                    if (!audioCtx) return;
+
+                    const now = audioCtx.currentTime;
+                    // Create an annoying alarm pattern
+                    for (let i = 0; i < 8; i++) {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+
+                        osc.type = 'square';
+                        osc.frequency.value = i % 2 === 0 ? 800 : 600;
+                        gain.gain.value = 0.15;
+
+                        osc.start(now + i * 0.2);
+                        osc.stop(now + i * 0.2 + 0.15);
+                    }
+                }
+
+                // Play immediately and loop
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                playAlarmPattern();
+                alarmSound = setInterval(playAlarmPattern, 2000);
+
+            } catch (e) {
+                console.warn('Audio not available:', e);
+            }
+        }
+
+        function stopAlarmSound() {
+            clearInterval(alarmSound);
+            alarmSound = null;
+            if (audioCtx) {
+                audioCtx.close();
+                audioCtx = null;
+            }
+        }
+
+        // ===== Vibration =====
+        function startVibration() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate([500, 200, 500, 200, 500]);
+                vibrationInterval = setInterval(() => {
+                    navigator.vibrate([500, 200, 500, 200, 500]);
+                }, 2500);
+            }
+        }
+
+        function stopVibration() {
+            clearInterval(vibrationInterval);
+            vibrationInterval = null;
+            if ('vibrate' in navigator) {
+                navigator.vibrate(0);
+            }
+        }
+
+        // ===== Wake Lock =====
+        async function tryWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    await navigator.wakeLock.request('screen');
+                }
+            } catch (e) {
+                // Ignore
+            }
+        }
+
+        // ===== Camera QR Scanner =====
+        async function startCamera() {
+            const video = $('camera-video');
+            const errorMsg = $('camera-error');
+            errorMsg.style.display = 'none';
+            video.style.display = 'block';
+
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+                video.srcObject = cameraStream;
+                await video.play();
+                startScanning();
+            } catch (e) {
+                console.warn('Camera error:', e);
+                video.style.display = 'none';
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(t => t.stop());
+                cameraStream = null;
+            }
+            cancelAnimationFrame(scanLoopId);
+            scanLoopId = null;
+        }
+
+        function startScanning() {
+            const video = $('camera-video');
+            const canvas = $('qr-canvas-hidden');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+            function scanFrame() {
+                if (!video.videoWidth || !video.videoHeight) {
+                    scanLoopId = requestAnimationFrame(scanFrame);
+                    return;
+                }
+
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0);
+
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: 'dontInvert'
+                });
+
+                if (code && code.data) {
+                    // Check if the scanned code matches our alarm ID
+                    if (code.data === alarmId || code.data.includes(alarmId)) {
+                        onQRScanned();
+                        return;
+                    }
+                }
+
+                scanLoopId = requestAnimationFrame(scanFrame);
+            }
+
+            scanLoopId = requestAnimationFrame(scanFrame);
+        }
+
+        // ===== QR Scanned Successfully =====
+        function onQRScanned() {
+            // Stop everything
+            stopAlarmSound();
+            stopVibration();
+            stopCamera();
+
+            // Update success message with time
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            $('success-msg').innerHTML = `
+                恭喜你在 <strong>${timeStr}</strong> 成功走到了马桶前！<br>
+                新的一天从如厕开始 🚽✨
+            `;
+
+            // Clear or reschedule alarm
+            const saved = JSON.parse(localStorage.getItem('toilet-alarm') || 'null');
+            if (saved && saved.repeatDays && saved.repeatDays.length > 0) {
+                // Keep repeating alarm
+                scheduleAlarm();
+            } else {
+                localStorage.removeItem('toilet-alarm');
+            }
+
+            showPage(successPage);
+        }
+
+        // ===== Retry Camera =====
+        $('retry-camera-btn').addEventListener('click', () => {
+            startCamera();
+        });
+
+        // ===== Cancel Alarm =====
+        $('cancel-alarm-btn').addEventListener('click', () => {
+            showModal('取消闹钟', '确定要取消闹钟吗？', () => {
+                clearTimeout(alarmTimeout);
+                clearInterval(countdownInterval);
+                localStorage.removeItem('toilet-alarm');
+                alarmTime = null;
+                alarmId = '';
+                showPage(setupPage);
+            });
+        });
+
+        // ===== Back to Setup =====
+        $('back-to-setup-btn').addEventListener('click', () => {
+            const saved = JSON.parse(localStorage.getItem('toilet-alarm') || 'null');
+            if (saved && saved.repeatDays && saved.repeatDays.length > 0) {
+                alarmTime = saved;
+                alarmId = saved.id;
+                const timeStr = `${String(saved.hour).padStart(2, '0')}:${String(saved.minute).padStart(2, '0')}`;
+                $('alarm-time-display').textContent = timeStr;
+                generateQRCode($('toilet-qr'), alarmId);
+                showPage(armedPage);
+                updateCountdown();
+                clearInterval(countdownInterval);
+                countdownInterval = setInterval(updateCountdown, 1000);
+            } else {
+                alarmTime = null;
+                alarmId = '';
+                showPage(setupPage);
+            }
+        });
+
+        // ===== Modal =====
+        function showModal(title, msg, onConfirm) {
+            $('modal-title').textContent = title;
+            $('modal-msg').textContent = msg;
+            $('confirm-modal').classList.add('active');
+
+            const confirmBtn = $('modal-confirm');
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+            newBtn.addEventListener('click', () => {
+                $('confirm-modal').classList.remove('active');
+                onConfirm();
+            });
+
+            $('modal-cancel').onclick = () => {
+                $('confirm-modal').classList.remove('active');
+            };
+        }
+
+        // ===== Restore Alarm from Storage =====
+        function restoreAlarm() {
+            const saved = JSON.parse(localStorage.getItem('toilet-alarm') || 'null');
+            if (!saved) return;
+
+            alarmTime = saved;
+            alarmId = saved.id;
+
+            // Check if alarm time has passed (for non-repeating)
+            const now = new Date();
+            let target = new Date(now);
+            target.setHours(saved.hour, saved.minute, 0, 0);
+
+            if (target <= now && (!saved.repeatDays || saved.repeatDays.length === 0)) {
+                // Check if it's within the same minute window (5 min grace)
+                const diff = now - target;
+                if (diff > 300000) {
+                    // Too late, clear
+                    localStorage.removeItem('toilet-alarm');
+                    return;
+                }
+            }
+
+            // Restore repeat day selections
+            if (saved.repeatDays) {
+                saved.repeatDays.forEach(day => {
+                    const btn = document.querySelector(`.repeat-day[data-day="${day}"]`);
+                    if (btn) btn.classList.add('active');
+                });
+            }
+
+            const timeStr = `${String(saved.hour).padStart(2, '0')}:${String(saved.minute).padStart(2, '0')}`;
+            $('alarm-time-display').textContent = timeStr;
+            hourSelect.value = saved.hour;
+            minuteSelect.value = saved.minute;
+
+            generateQRCode($('toilet-qr'), alarmId);
+
+            showPage(armedPage);
+            updateCountdown();
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(updateCountdown, 1000);
+
+            scheduleAlarm();
+        }
+
+        // ===== Visibility Change - re-check alarm =====
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && alarmTime) {
+                const now = new Date();
+                const h = now.getHours();
+                const m = now.getMinutes();
+
+                if (h === alarmTime.hour && m === alarmTime.minute) {
+                    // Check repeat days
+                    if (alarmTime.repeatDays && alarmTime.repeatDays.length > 0) {
+                        if (alarmTime.repeatDays.includes(now.getDay())) {
+                            triggerAlarm();
+                        }
+                    } else {
+                        triggerAlarm();
+                    }
+                }
+            }
+        });
+
+        // ===== Cleanup on page unload =====
+        window.addEventListener('beforeunload', () => {
+            stopAlarmSound();
+            stopVibration();
+            stopCamera();
+            clearTimeout(alarmTimeout);
+            clearInterval(countdownInterval);
+        });
+
+        // ===== Init =====
+        restoreAlarm();
+
+    })();
+    </script>
+</body>
+</html>
