@@ -162,16 +162,18 @@
 
         .picker-item {
             height: 40px;
+            line-height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
+            font-size: 28px;
             font-weight: 700;
             color: rgba(255, 255, 255, 0.25);
             transition: all 0.2s ease;
             scroll-snap-align: center;
             user-select: none;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .picker-item.active {
@@ -995,56 +997,86 @@
         const ITEM_HEIGHT = 40;
 
         function createPicker(list, items, defaultIndex, onSelect) {
-            // Add padding items at top and bottom
-            const padding = 10;
+            const padding = 3; // Fewer padding items
+            
+            // Add padding items at top
             for (let i = 0; i < padding; i++) {
                 const spacer = document.createElement('div');
                 spacer.className = 'picker-item';
+                spacer.style.height = ITEM_HEIGHT + 'px';
                 spacer.style.visibility = 'hidden';
                 list.appendChild(spacer);
             }
 
+            // Add item list
             items.forEach((val, idx) => {
                 const item = document.createElement('div');
                 item.className = 'picker-item';
                 item.textContent = val;
                 item.dataset.index = idx;
-                item.addEventListener('click', () => {
-                    list.scrollTop = idx * ITEM_HEIGHT;
-                    onSelect(idx);
-                });
+                item.style.height = ITEM_HEIGHT + 'px';
                 list.appendChild(item);
             });
 
+            // Add padding items at bottom
             for (let i = 0; i < padding; i++) {
                 const spacer = document.createElement('div');
                 spacer.className = 'picker-item';
+                spacer.style.height = ITEM_HEIGHT + 'px';
                 spacer.style.visibility = 'hidden';
                 list.appendChild(spacer);
             }
 
-            // Set initial position
+            // Scroll to default
             list.scrollTop = defaultIndex * ITEM_HEIGHT;
+            onSelect(defaultIndex);
 
-            // Scroll end handler
+            // Scroll handler with debounce
+            let scrollTimeout;
             list.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const idx = Math.round(list.scrollTop / ITEM_HEIGHT);
+                    const clampedIdx = Math.max(0, Math.min(idx, items.length - 1));
+                    onSelect(clampedIdx);
+                    updateActiveItem(list, clampedIdx, items.length);
+                }, 10);
+            });
+
+            // Touch end handler for snapping
+            list.addEventListener('touchend', () => {
                 const idx = Math.round(list.scrollTop / ITEM_HEIGHT);
-                if (idx >= 0 && idx < items.length) {
-                    onSelect(idx);
-                    updateActiveItem(list, idx);
+                const clampedIdx = Math.max(0, Math.min(idx, items.length - 1));
+                list.scrollTop = clampedIdx * ITEM_HEIGHT;
+                onSelect(clampedIdx);
+                updateActiveItem(list, clampedIdx, items.length);
+            });
+
+            // Click handler
+            list.addEventListener('click', (e) => {
+                if (e.target.classList.contains('picker-item') && e.target.textContent) {
+                    const idx = parseInt(e.target.dataset.index);
+                    if (!isNaN(idx)) {
+                        list.scrollTop = idx * ITEM_HEIGHT;
+                        onSelect(idx);
+                        updateActiveItem(list, idx, items.length);
+                    }
                 }
             });
 
             // Init active state
-            updateActiveItem(list, defaultIndex);
+            updateActiveItem(list, defaultIndex, items.length);
         }
 
-        function updateActiveItem(list, activeIdx) {
+        function updateActiveItem(list, activeIdx, itemCount) {
             const items = list.querySelectorAll('.picker-item');
-            const padding = 10;
+            const padding = 3;
             items.forEach((item, i) => {
                 const idx = i - padding;
-                if (idx < 0 || idx >= 24) return; // skip padding
+                if (idx < 0 || idx >= itemCount) {
+                    item.classList.remove('active', 'near');
+                    return;
+                }
                 item.classList.remove('active', 'near');
                 if (idx === activeIdx) {
                     item.classList.add('active');
